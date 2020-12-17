@@ -59,6 +59,8 @@ Data:  Folder where data used and produced in project is stored
 
 - Severe_Control_DE_genes.csv:  data frame of differentially expressed genes between Severe COVID-19 and Control cells with p-values
 
+- Donor_Classification_Results.csv: Summary results of the accuracy of the KNN and RBF SVM classifiers correctly classifying Donor cells and classification of the Donors as COVID-19 or Control in the testing set.
+
 - knn_classifier:  file where KNN results are stored
 - svm_classifier:  file where RBF SVM training info and model is stored
 
