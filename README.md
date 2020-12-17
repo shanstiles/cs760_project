@@ -1,3 +1,7 @@
+Data and Repository Links:
+https://github.com/shanstiles/cs760_project
+https://uwmadison.box.com/s/i3k2p9gkz4av04ewg4scu5t7yaz7z6h4
+
 # CS_760 Final Project
 ## Fall 2020
 
@@ -31,7 +35,7 @@ smv_opt:  Folder that contains the classifiers and final results of the RBF SVM 
 - 17 RBF SVM classifier files (16 from 4x4 hyperparameter combinations and 1 from default SVM hyperparameters)
 - SVM_Optimization_Results: dataframe of the parameter combinations and the resulting accuracy, sensitivity, and specificity values
 
-Github Repository:
+Github Repository: https://github.com/shanstiles/cs760_project
 
 File Directory:
 
@@ -77,7 +81,8 @@ Figures: Folder where all figures are located in .png format
 - Covid_Control_UMAP: unused in final paper (exploratory)
 
 Report: Folder where report and latex files are located
-  - Stiles_Khatri_CS760_Project.pdf: Final Report
+  - Stiles_Khatri_CS760_Project_Report.pdf: Final Report
+  - Stiles_Khatri_CS760_Report zip folder: Final Report Submission (All .tex source files, .pdf of a report, and README.md with github repository and BOX data storage links)
   
   
 ## Deliverables
