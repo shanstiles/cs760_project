@@ -1,0 +1,394 @@
+---
+title: "Machine Learning Workflow"
+author: "Shannon Stiles and Parth Khatri"
+date: "Due 12/12/2020"
+output: word_document
+---
+
+```{r setup}
+
+# read in libraries
+library(tidyverse)
+library(dplyr)
+library(stringr)
+library(e1071)
+library(class)
+
+# MAKE SURE YOUR KNIT DIRECTORY IS SET TO YOUR PROJECT DIRECTORY
+
+```
+
+
+# Preprocessing
+```{r read_data}
+
+training <- readRDS("./data/training_data")
+
+testing = readRDS("./data/testing_data")
+
+DE_genes <- readRDS("./data/DE_genes")
+
+```
+
+
+```{r subset_data}
+
+# define columns of differentially expressed(DE) genes to subset datasets
+cols <- c(DE_genes, "donor", "label")
+
+# subset training and testing data for only DE genes and donor and label cols
+training <- subset(training, select = cols)
+testing <- subset(testing, select = cols)
+
+# Define X and Y for training and testing datasets
+X_train <- training%>%select(-"donor", -"label")
+  
+Y_train <- as.vector(t(training%>%select("label")))
+
+X_test <- testing%>%select(-"donor", -"label")
+  
+Y_test <- as.vector(t(testing%>%select("label")))
+
+```
+
+# K-Nearest Neighbors Classification of Covid and Control Patient Cells
+```{r knn_classifier}
+
+# run KNN classification with timer
+system.time(knn_classifier <- knn(X_train, X_test, Y_train, k = round(sqrt(nrow(X_train)))))
+
+```
+
+
+```{r knn_results}
+
+# summarize KNN classification results in a confusion matrix
+conf_mx <- table(knn_classifier, Y_test)
+conf_mx
+
+# calculate accuracy of the test set
+accuracy <- function(x){sum(diag(x)/(sum(rowSums(x)))) * 100}
+accuracy(conf_mx)
+
+knn_sens <- conf_mx[4] / (conf_mx[4] + conf_mx[3])
+knn_sens
+
+knn_spec <- conf_mx[1] / (conf_mx[1] + conf_mx[2])
+knn_spec
+
+```
+
+
+# Radial Basis Function (RBF) SVM Classification of Covid and Control Patient Cells
+
+# Optimize C and Gamma Parameters
+- C: 0.01, 0.1, 1, 10
+- Gamma: 0.000001, 0.001, 1, 10
+
+```{r opt_svm}
+
+# initialize range of C parameters
+c_range <- c(0.01, 0.1, 1, 10)
+
+# initialize range of Gamma parameters
+gamma_range <- c(0.000001, 0.001, 1, 10)
+
+
+optimization_results <- data.frame("c" = numeric(),
+                                   "gamma" = numeric(),
+                                   "acc" = numeric(), 
+                                   "sens" = numeric(),
+                                   "spec" = numeric())
+
+
+# iterate for donors randomly assigned to testing dataset
+for (curr_c in c_range) {
+  for (curr_gamma in gamma_range) {
+    
+    print(str_c("C: ", curr_c, " Gamma: ", curr_gamma))
+    
+    # run RBF SVM classification with timer
+    system.time(svm_classifier <- svm(X_train, Y_train, type = "C-classification", kernel = "radial", gamma = curr_gamma, cost = curr_c))
+  
+    # display information about the svm classifier
+    summary(svm_classifier)
+    saveRDS(svm_classifier, str_c("./data/svm_opt/svm_", curr_c, "_", curr_gamma))
+    
+    # predict testing data
+    system.time(pred <- predict(svm_classifier, X_test))
+    
+    # summarize KNN classification results in a confusion matrix
+    svm_conf_mx <- table(pred, Y_test)
+
+    # calculate the accuracy of the test set
+    accuracy <- function(x){sum(diag(x)/(sum(rowSums(x)))) * 100}
+    svm_acc <- accuracy(svm_conf_mx)
+  
+    # calculate the sensitivity
+    svm_sens <- svm_conf_mx[4] / (svm_conf_mx[4] + svm_conf_mx[3])
+  
+    # calculate the specificity
+    svm_spec <- svm_conf_mx[1] / (svm_conf_mx[1] + svm_conf_mx[2])
+  
+    curr_parameters <- data.frame(curr_c, curr_gamma, svm_acc, svm_sens, svm_spec)
+    
+    print(curr_parameters)
+    
+    optimization_results <- rbind(optimization_results, curr_parameters)
+  }
+}
+
+print(optimization_results)
+
+path <- "./data/svm_opt"
+
+# write.csv(optimization_results, file.path(path, "SVM_Optimization_Results.csv"),row.names = TRUE)
+
+```
+
+# Check RBF SVM results using the default C and gamma hyperparameter values
+```{r default_rbf_svm_classifier}
+
+# run RBF SVM classification with timer
+system.time(svm_classifier <- svm(X_train, Y_train, type = "C-classification", kernel = "radial", gamma = 1 / ncol(X_train), cost = 1))
+
+```
+
+```{r default_rbf_svm_summary}
+
+# display information about the svm classifier
+summary(svm_classifier)
+
+```
+
+```{r default_rbf_svm_predictions}
+
+# predict testing data
+system.time(pred <- predict(svm_classifier, X_test))
+
+```
+
+```{r default_rbf_svm_results}
+
+# summarize KNN classification results in a confusion matrix
+svm_conf_mx <- table(pred, Y_test)
+svm_conf_mx
+
+# calculate the accuracy of the test set
+accuracy(svm_conf_mx)
+
+# calculate sensitivity
+svm_sens <- svm_conf_mx[4] / (svm_conf_mx[4] + svm_conf_mx[3])
+svm_sens
+
+# calculate specificity
+svm_spec <- svm_conf_mx[1] / (svm_conf_mx[1] + svm_conf_mx[2])
+svm_spec
+
+
+```
+
+
+# Run RBF SVM with the best hyperparameters: C = 0.1 and Gamma = 0.001
+```{r rbf_svm_classifier}
+
+# run RBF SVM classification with timer
+system.time(svm_classifier <- svm(X_train, Y_train, type = "C-classification", kernel = "radial", gamma = 0.001, cost = 0.1))
+
+```
+
+```{r rbf_svm_summary}
+
+# display information about the svm classifier
+summary(svm_classifier)
+
+```
+
+```{r rbf_svm_predictions}
+
+# predict testing data
+system.time(pred <- predict(svm_classifier, X_test))
+
+```
+
+
+```{r rbf_svm_results}
+
+# summarize KNN classification results in a confusion matrix
+svm_conf_mx <- table(pred, Y_test)
+svm_conf_mx
+
+# calculate the accuracy of the test set
+accuracy(svm_conf_mx)
+
+# calculate sensitivity
+svm_sens <- svm_conf_mx[4] / (svm_conf_mx[4] + svm_conf_mx[3])
+svm_sens
+
+# calculate specificity
+svm_spec <- svm_conf_mx[1] / (svm_conf_mx[1] + svm_conf_mx[2])
+svm_spec
+
+
+```
+
+# Summarize Cell Classification Results in ROC curves
+
+```{r reformat_preds}
+
+# Reformat ML algorithm predictions from factors to numeric vectors
+knn_preds <- as.numeric(as.vector(knn_classifier))
+
+svm_preds <- as.numeric(as.vector(pred))
+
+```
+
+
+```{r summary_curves}
+
+library(ROCit)
+
+# KNN ROC curve
+knn_ROCit <- rocit(score = knn_preds, class = Y_test)
+plot(knn_ROCit)
+
+# print KNN AUC value
+knn_ROCit$AUC
+
+# SVM ROC Curve
+svm_ROCit <- rocit(score = svm_preds, class = Y_test)
+plot(svm_ROCit)
+
+# print SVM AUC value
+svm_ROCit$AUC
+
+```
+
+
+# Classify Covid and Control Donors based on Cell Classification
+
+```{r create_pred_df}
+# convert prediction vectors to dataframes
+
+knn_pred_df <- data.frame("KNN_preds" = knn_preds)
+
+svm_pred_df <- data.frame("svm_preds" = svm_preds)
+
+# append the KNN and SVM predictions to the original training dataframe
+
+testing_results <- cbind(testing, knn_preds)
+
+testing_results <- cbind(testing_results, svm_preds)
+
+# select only donor, label, knn_preds, and svm_preds
+ml_results <- testing_results%>%select("donor", "label", "knn_preds", "svm_preds")
+
+```
+
+
+```{r donor_classification}
+testing_donors <- unique(ml_results$donor)
+
+donor_classification <- data.frame("donor" = character(),
+                                   "num_cells" = numeric(),
+                                   "label" = character(), 
+                                   "knn_pred" = character(),
+                                   "knn_acc" = numeric(),
+                                   "knn_correct" = numeric(),
+                                   "knn_incorrect" = numeric(),
+                                   "svm_pred" = character(),
+                                   "svm_acc" = numeric(),
+                                   "svm_correct" = numeric(),
+                                   "svm_incorrect" = numeric())
+
+
+# iterate for donors randomly assigned to testing dataset
+for (curr_donor in testing_donors) {
+  
+  # filter for current donor cell labels and predictions
+  curr_df <- ml_results%>%filter(donor == curr_donor)
+  
+  # get number of cells of current donor in testing set
+  num_cells <- nrow(curr_df)
+  
+  # get correct label for current donor
+  curr_label = curr_df$label
+  
+  # summarize current donor classification results for each set of predictions in confusion matrix
+  knn_mx = table(curr_df$knn_preds, curr_label)
+  print(knn_mx)
+  svm_mx = table(curr_df$svm_preds, curr_label)
+  print(svm_mx)
+  
+  knn_correct = NA
+  knn_incorrect = NA
+  svm_correct = NA
+  svm_incorrect = NA
+  
+  # Extract correct and incorrect classification and calculate accuracy
+  if (unique(curr_label) == 1) {
+    
+    # KNN
+    knn_correct = knn_mx[2]
+    knn_incorrect = knn_mx[1]
+    knn_acc = (knn_mx[2] / (knn_mx[1] + knn_mx[2])) * 100
+    
+    # SVM
+    svm_correct = svm_mx[2]
+    svm_incorrect = svm_mx[1]
+    svm_acc = (svm_mx[2] / (svm_mx[1] + svm_mx[2])) * 100
+  } else if (unique(curr_label) == -1) {
+    
+    # KNN
+    knn_correct = knn_mx[1]
+    knn_incorrect = knn_mx[2]
+    knn_acc = (knn_mx[1] / (knn_mx[1] + knn_mx[2])) * 100
+    
+    # SVM
+    svm_correct = svm_mx[1]
+    svm_incorrect = svm_mx[2]
+    svm_acc = (svm_mx[1] / (svm_mx[1] + svm_mx[2])) * 100
+  }
+  
+  
+  # predict donor's condition based on cell classification results
+  knn_donor_pred = NA
+  svm_donor_pred = NA
+  
+  if (unique(curr_label) == 1 & knn_acc > 50) {
+    knn_donor_pred = "Covid" 
+  } else {
+    knn_donor_pred = "Control"
+  }
+  
+  if (unique(curr_label) == -1 & knn_acc > 50) {
+    knn_donor_pred = "Control" 
+  } else {
+    knn_donor_pred = "Covid"
+  }
+  
+  if (unique(curr_label) == -1 & svm_acc > 50) {
+    svm_donor_pred = "Control" 
+  } else {
+    svm_donor_pred = "Covid"
+  }
+  
+  label = unique(curr_label)
+  
+  if (label == 1) {
+    label = "Covid"
+  } else {
+    label = "Control"
+  }
+  
+  preds_df <- data.frame(curr_donor, num_cells, label, knn_donor_pred, knn_acc, knn_correct, knn_incorrect, svm_donor_pred, svm_acc, svm_correct, svm_incorrect)
+  
+  donor_classification <- rbind(donor_classification, preds_df)
+}
+
+print(donor_classification)
+
+path <- "./data/"
+
+write.csv(donor_classification, file.path(path, "Donor_Classification_Results.csv"),row.names = TRUE)
+```
