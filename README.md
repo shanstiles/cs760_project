@@ -10,6 +10,25 @@ Single-cell RNA-sequencing is being used to profile the immune landscape of pati
 ## Data
 Data from: Severe COVID-19 Is Marked by a Dysregulated Myeloid Cell Compartment
 DOI:https://doi.org/10.1016/j.cell.2020.08.001
+Raw Data can be downloaded from FASTGENOMICS: https://www.fastgenomics.org/news/fg-covid-19-cell/
+
+Large Data Files are stored on BOX:
+
+Large Data:
+
+- seurat_COVID19_freshWB-PBMC_cohort2_rhapsody_jonas_FG_2020-08-18.rds: original RDS file from paper of fresh WB and PBMC count matrices for Bonn Cohort
+
+- seurat_COVID19_PBMC_jonas_FG_2020-07-23.rds:  original RDS file from paper of frozen PBMC count matrices for Bonn cohort
+
+ cs760project_COVID19scRNAseq_dataCohort2.rds: merged and cleaned data set of fresh and frozen PBMC count matrices
+
+- training_data: contains cells from 4 randomly assigned severe COVID-19 and 4 Control donors
+
+- testing_data: contains cells from the other 4 severe COVID-19 and 4 Control donors
+
+smv_opt:  Folder that contains the classifiers and final results of the RBF SVM hyperparameter optimization
+
+- 17 RBF SVM classifier files (16 from 4x4 hyperparameter combinations and 1 from default SVM hyperparameters)
 
 File Directory:
 
@@ -27,17 +46,7 @@ Code: Folder where code used in project is stored
 
 Data:  Folder where data used and produced in project is stored
 
-- seurat_COVID19_freshWB-PBMC_cohort2_rhapsody_jonas_FG_2020-08-18.rds: original RDS file from paper of fresh WB and PBMC count matrices for Bonn Cohort
-
-- seurat_COVID19_PBMC_jonas_FG_2020-07-23.rds:  original RDS file from paper of frozen PBMC count matrices for Bonn cohort
-
 - mmc1.xlsx: cohort information in the seq-QC tab
-
-- cs760project_COVID19scRNAseq_dataCohort2.rds: merged and cleaned data set of fresh and frozen PBMC count matrices
-
-- training_data: contains cells from 4 randomly assigned severe COVID-19 and 4 Control donors
-
-- testing_data: contains cells from the other 4 severe COVID-19 and 4 Control donors
 
 - DE_genes: List of differentially expressed genes between Severe COVID-19 and Control cells
 
@@ -48,7 +57,7 @@ Data:  Folder where data used and produced in project is stored
 
 smv_opt:  Folder that contains the classifiers and final results of the RBF SVM hyperparameter optimization
 
-- 17 RBF SVM classifier files (16 from 4x4 hyperparameter combinations and 1 from default SVM hyperparameters)
+- 1/17 RBF SVM classifier files that was below the upload limit (16 from 4x4 hyperparameter combinations and 1 from default SVM hyperparameters total - Please see on Box)
 - SVM_Optimization_Results: dataframe of the parameter combinations and the resulting accuracy, sensitivity, and specificity values
 
 Figures: Folder where all figures are located in .png format
