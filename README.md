@@ -64,7 +64,7 @@ Data:  Folder where data used and produced in project is stored
 - knn_classifier:  file where KNN results are stored
 - svm_classifier:  file where RBF SVM training info and model is stored
 
-smv_opt:  Folder that contains the classifiers and final results of the RBF SVM hyperparameter optimization
+smv_opt:  Folder that contains the classifiers and final results of the RBF SVM hyperparameter optimization (svm optimization code chunk in ML_Workflow.Rmd and it took ~12 hours to run)
 
 - 1/17 RBF SVM classifier files that was below the upload limit (16 from 4x4 hyperparameter combinations and 1 from default SVM hyperparameters total - Please see on Box)
 - SVM_Optimization_Results: dataframe of the parameter combinations and the resulting accuracy, sensitivity, and specificity values
