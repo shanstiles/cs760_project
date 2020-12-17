@@ -12,7 +12,7 @@ Data from: Severe COVID-19 Is Marked by a Dysregulated Myeloid Cell Compartment
 DOI:https://doi.org/10.1016/j.cell.2020.08.001
 Raw Data can be downloaded from FASTGENOMICS: https://www.fastgenomics.org/news/fg-covid-19-cell/
 
-Large Data Files are stored on BOX:
+Large Data Files are stored on BOX:https://uwmadison.box.com/s/i3k2p9gkz4av04ewg4scu5t7yaz7z6h4
 
 Large Data:
 
@@ -20,7 +20,7 @@ Large Data:
 
 - seurat_COVID19_PBMC_jonas_FG_2020-07-23.rds:  original RDS file from paper of frozen PBMC count matrices for Bonn cohort
 
- cs760project_COVID19scRNAseq_dataCohort2.rds: merged and cleaned data set of fresh and frozen PBMC count matrices
+- cs760project_COVID19scRNAseq_dataCohort2.rds: merged and cleaned data set of fresh and frozen PBMC count matrices
 
 - training_data: contains cells from 4 randomly assigned severe COVID-19 and 4 Control donors
 
@@ -29,6 +29,9 @@ Large Data:
 smv_opt:  Folder that contains the classifiers and final results of the RBF SVM hyperparameter optimization
 
 - 17 RBF SVM classifier files (16 from 4x4 hyperparameter combinations and 1 from default SVM hyperparameters)
+- SVM_Optimization_Results: dataframe of the parameter combinations and the resulting accuracy, sensitivity, and specificity values
+
+Github Repository:
 
 File Directory:
 
